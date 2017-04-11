@@ -1,0 +1,239 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SPARQL Cabinet</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, , initial-scale=1.0" />
+    <link rel="stylesheet" href="../Content/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Oxygen:400,700" rel="stylesheet">
+    <link href="../Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="../Content/toastr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../Content/style.css" />
+</head>
+<body>
+    <header>
+        <nav id="header-nav" class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="common.html" class="pull-left">
+                        <div id="logo"></div>
+                    </a>
+
+                    <div class="navbar-brand">
+                        <a href="common.html"><h1>SPARQL Cabinet</h1></a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" class="container" data-bind="with : $data">
+        <div id="loading-overlay" data-bind="visible: loading"></div>
+        <!-- ko if: ShowListPage() == true -->
+        <div data-bind="template: { name: 'queries-view', data: QueryList }"></div>
+        <!-- /ko -->
+        <!-- ko if: ShowListPage() == false -->
+        <div data-bind="template: { name: 'queries-edit', data: SingleQueryData }"></div>
+        <!-- /ko -->
+    </main>
+
+    <footer id="footer" class="navbar-fixed-bottom panel-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4 pull-left">
+                    <span>Product developed for evaluation purpose.</span>
+                </div>
+                <div id="contactinfo" class="col-sm-4 pull-left">
+                </div>
+                <div id="contactinfo" class="col-sm-4 pull-right">
+                    <span>Yogesh Tiwari</span><br />
+                    <span>Contact : +31 653767829</span>
+                    <ul class="social_icons">
+                        <li class="social">
+                            <a href="https://www.linkedin.com/in/yogeshtiwari1990/" target="_blank">
+                                <img src="../images/linkedin.png" />
+                            </a>
+                        </li>
+                        <li class="social">
+                            <a href="mailto:yogeshtiwari1990@gmail.com?Subject=Regarding_Semmtech" target="_blank ">
+                                <img src="../images/gmail.png " />
+                            </a>
+                        </li>
+                        <li class="social">
+                            <a href="https://www.facebook.com/yogeshtiwari1990" target="_blank ">
+                                <img src="../images/Facebook.png " />
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../Scripts/jquery-3.1.1.min.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+    <script src="../Scripts/knockout-3.4.2.js"></script>
+    <script src="../Scripts/knockout.validation.min.js"></script>
+    <script src="../Scripts/bootbox.min.js"></script>
+    <script src="../Scripts/toastr.min.js"></script>
+    <script src="../ScriptsApp/common.js"></script>
+</body>
+</html>
+
+<script type="text/html" id="queries-view">
+    <div class="searchbar container">
+        <div class="row">
+            <div class="searchcontainer col-sm-4">
+                <div id="search_container">
+                    <div class="input-group stylish-input-group">
+                        <input id="search_text_input" type="search" class="form-control" placeholder="Search" data-bind="value: $parent.SearchText, valueUpdate: 'keyup'" autocomplete="off">
+                        <span class="input-group-addon">
+                            <button type="submit">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-4 col-sm-offset-4">
+                <button class="btn btn-success pull-right" data-bind="click: function(data, event) { $parent.OpenDetailsPage(true, null);}">
+                    <i class="fa fa-plus" aria-hidden="true" style="margin-right:5px"></i>Add New
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id='tableListOfQueries'>
+        <table class="table table-condensed">
+            <thead class="tablehead">
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Creator</th>
+                    <th>Query</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: $data">
+                <tr>
+                    <td class="mightOverflow" data-bind="text: id"></td>
+                    <td class="mightOverflow" data-bind="text: name"></td>
+                    <td class="mightOverflow" data-bind="text: description"></td>
+                    <td class="mightOverflow" data-bind="text: creator"></td>
+                    <td class="mightOverflow" data-bind="text: query"></td>
+                    <td>
+                        <button data-bind="click: function(data, event) { $parents[1].OpenDetailsPage(false, $data);}, text:'View'"></button>
+                        <button data-bind="click: function(data, event) { $parents[1].OpenDetailsPage(true, $data);}, text:'Edit'"></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</script>
+
+<script type="text/html" id="queries-edit">
+
+    <div style="margin-bottom:30px" class="row">
+        <div class="col-sm-4">
+            <button class="btn btn-default pull-left" data-bind="click: function(data, event) { $parent.Back($parent.SingleQueryData());}">
+                <i class="fa fa-arrow-left" aria-hidden="true" style="margin-right:5px"></i> Back
+            </button>
+        </div>
+        <div class="col-sm-4 col-sm-offset-4">
+            <button class="btn btn-success" data-bind="visible:$parents[1].IsEdit(), click: function(data, event) { $parent.SaveQuery($data);}">
+                <i class="fa fa-check" aria-hidden="true" style="margin-right:5px"></i> Save
+            </button>
+            <button class="btn btn-warning" data-bind="visible:$parents[1].IsEdit(), click: function(data, event) { $parent.CancelEdit($data);}">
+                <i class="fa fa-times" aria-hidden="true" style="margin-right:5px"></i> Cancel
+            </button>
+            <button class="btn btn-primary" data-bind="visible:!$parents[1].IsEdit(), click: function(data, event) { $parent.OpenDetailsPage(true, $data);}">
+                <i class="fa fa-pencil" aria-hidden="true" style="margin-right:5px"></i> Edit
+            </button>
+            <button class="btn btn-danger" data-bind="visible:!$parents[1].IsNew(), click: function(data, event) { $parent.DeleteQuery($data);}">
+                <i class="fa fa-trash" aria-hidden="true" style="margin-right:5px"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- ko if: $parents[1].IsEdit() == true -->
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-sm-2"><sup>*</sup> Id:</label>
+            <div class="col-sm-10">
+                <!-- ko if: $parents[1].IsNew() == true -->
+                <input class="inputsingleline form-control" placeholder="Enter Unique Id" data-bind="value:id">
+                <!-- /ko -->
+                <!-- ko if: $parents[1].IsNew() == false -->
+                <input class="inputsingleline form-control" placeholder="Enter Unique Id" data-bind="value:id" disabled>
+                <!-- /ko -->
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2"><sup>*</sup> Name:</label>
+            <div class="col-sm-10">
+                <input class="inputsingleline form-control" placeholder="Enter Query Name" data-bind="value:name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2"><sup>*</sup> Creator:</label>
+            <div class="col-sm-10">
+                <input class="inputsingleline form-control" placeholder="Enter Your Name" data-bind="value:creator">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Description:</label>
+            <div class="col-sm-10">
+                <textarea rows="2" class="inputmultipleline form-control" placeholder="Enter Description" data-bind="value:description"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2"><sup>*</sup> Query:</label>
+            <div class="col-sm-10">
+                <textarea rows="5" class="inputmultipleline form-control" placeholder="Enter Query" data-bind="value:query"></textarea>
+            </div>
+        </div>
+        <span class="control-label col-sm-2"><sup>*</sup> Mandatory</span>
+
+    </form>
+    <!-- /ko -->
+    <!-- ko if: $parents[1].IsEdit() == false -->
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-sm-2">Id:</label>
+            <div class="col-sm-10">
+                <p class="form-control-static" data-bind="text:id"></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Name:</label>
+            <div class="col-sm-10">
+                <p class="form-control-static" data-bind="text:name"></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Creator:</label>
+            <div class="col-sm-10">
+                <p class="form-control-static" data-bind="text:creator"></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Description:</label>
+            <div class="col-sm-10">
+                <p class="form-control-static" data-bind="text:description"></p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Query:</label>
+            <div class="col-sm-10">
+                <p class="form-control-static" data-bind="text:query"></p>
+            </div>
+        </div>
+    </form>
+    <!-- /ko -->
+
+
+
+</script>
